@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Helical Spring Engineering Suite</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/STLExporter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* Professional UI/UX Design */
+        :root {
+            --primary: #1a252f;
+            --secondary: #2980b9;
+            --accent: #c0392b;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --bg-light: #ecf0f1;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --border: #bdc3c7;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+        .header h1 { margin: 0; color: var(--primary); font-weight: 700; font-size: 28px; letter-spacing: 1px; }
+        .header p { color: #7f8fa6; margin-top: 5px; font-size: 16px; }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        h3 {
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Form Styling */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: var(--primary); font-size: 13px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus { border-color: var(--secondary); outline: none; }
+        
+        /* Buttons */
+        .btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: 0.3s;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn:hover { background-color: #1f618d; }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+        .btn-outline:hover { background-color: var(--secondary); color: white; }
+        .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* Output Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .result-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--success);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .result-box.warn { border-left-color: var(--warning); background: #fdfae3; }
+        .result-box.danger { border-left-color: var(--accent); background: #fdf2f0; }
+        .result-box strong { display: block; font-size: 11px; color: #7f8fa6; text-transform: uppercase; margin-bottom: 5px; }
+        .result-box span { font-size: 18px; font-weight: bold; color: var(--primary); }
+        .result-box small { font-size: 12px; color: #95a5a6; font-weight: normal; }
+
+        .alert-container {
+            padding: 15px;
+            background-color: #fdf2f0;
+            border-left: 4px solid var(--accent);
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            display: none;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+
+        /* Visualization Areas */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .canvas-wrapper {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .canvas-header {
+            background: var(--bg-light);
+            padding: 10px 15px;
+            font-weight: 600;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #threeCanvas { width: 100%; height: 350px; display: block; }
+        canvas.chart { width: 100%; height: 350px !important; padding: 10px; }
+
+        /* Hidden Report Template */
+        #hiddenReport { display: none; }
+
+        @media (max-width: 1000px) {
+            .main-grid, .charts-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Advanced Helical Spring Engineering Suite</h1>
+    <p>Multi-Parameter Optimization | Shigley's Mechanical Engineering Design</p>
+</div>
+
+<div class="main-grid">
+    <div class="card">
+        <h3>Design Parameters</h3>
+        
+        <div class="form-group">
+            <label>Material Definition</label>
+            <select id="material">
+                <option value="A228">Music Wire (ASTM A228)</option>
+                <option value="A227">Hard-Drawn Steel (ASTM A227)</option>
+                <option value="A229">Oil-Tempered (ASTM A229)</option>
+                <option value="A232">Chrome-Vanadium (ASTM A232)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>End Condition</label>
+            <select id="end_condition">
+                <option value="plain">Plain Ends</option>
+                <option value="plain_ground">Plain & Ground</option>
+                <option value="squared">Squared / Closed</option>
+                <option value="squared_ground" selected>Squared & Ground</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Max Operating Force, F_max (N)</label>
+            <input type="number" id="force_max" step="1" value="100">
+        </div>
+
+        <div class="form-group">
+            <label>Min Operating Force, F_min (N)</label>
+            <input type="number" id="force_min" step="1" value="20">
+        </div>
+
+        <div class="form-group">
+            <label>Working Deflection, y_max (mm)</label>
+            <input type="number" id="def_max" step="0.1" value="30">
+        </div>
+
+        <div class="form-group">
+            <label>Operating Frequency, f_op (Hz)</label>
+            <input type="number" id="freq_op" step="1" value="50">
+        </div>
+
+        <div class="form-group">
+            <label>Target Safety Factor (Static & Fatigue)</label>
+            <input type="number" id="target_ns" step="0.1" value="1.2">
+        </div>
+
+        <button class="btn" onclick="UIController.computeAndRender()">Run Optimization Search</button>
+        
+        <div class="button-row">
+            <button class="btn btn-outline" onclick="ReportGenerator.generatePDF()">Export PDF Report</button>
+            <button class="btn btn-outline" onclick="Visualization3D.exportSTL()">Export STL</button>
+        </div>
+
+        <button class="btn btn-outline" style="margin-top: 10px; border-color: #27ae60; color: #27ae60;" onclick="UIController.copyMacro()">
+            📋 Copy SolidWorks Macro
+        </button>
+    </div>
+
+    <div class="card">
+        <h3>Engineering Diagnostics & Summary</h3>
+        
+        <div id="alertsContainer" class="alert-container"></div>
+
+        <div class="results-grid" id="summaryGrid">
+            </div>
+
+        <div class="charts-container">
+            <div class="canvas-wrapper">
+                <div class="canvas-header">
+                    <span>3D Interactive Model</span>
+                </div>
+                <div id="threeCanvas"></div>
+            </div>
+            
+            <div class="canvas-wrapper">
+                <div class="canvas-header">Fatigue Failure Envelope</div>
+                <canvas id="fatigueChart" class="chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="hiddenReport"></div>
+
+<script>
+/**
+ * MODULE 1: Material Database
+ */
+const MaterialDatabase = {
+    materials: {
+        A228: { name: "Music Wire", A_m: 2211, m: 0.145, G: 81700, den: 7850, shear_ratio: 0.45 },
+        A227: { name: "Hard-Drawn", A_m: 1783, m: 0.190, G: 79300, den: 7850, shear_ratio: 0.45 },
+        A229: { name: "OQ&T Steel", A_m: 1855, m: 0.187, G: 77200, den: 7850, shear_ratio: 0.50 },
+        A232: { name: "Chrome-Vanadium", A_m: 2005, m: 0.168, G: 77200, den: 7850, shear_ratio: 0.50 }
+    },
+    standardWires: [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5, 2.8, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0]
+};
+
+/**
+ * MODULE 2: Spring Physics Engine
+ */
+const SpringPhysics = {
+    calculateStiffness: (d, D, Na, G) => (Math.pow(d, 4) * G) / (8 * Math.pow(D, 3) * Na),
+    calculateActiveCoils: (d, D, k_req, G) => (Math.pow(d, 4) * G) / (8 * Math.pow(D, 3) * k_req),
+    calculateWahlFactor: (C) => ((4 * C - 1) / (4 * C - 4)) + (0.615 / C),
+    calculateShearStress: (F, D, d, Kw) => Kw * (8 * F * D) / (Math.PI * Math.pow(d, 3)),
+    calculateSurgeFrequency: (d, D, Na, G, den) => {
+        let d_m = d * 1e-3, D_m = D * 1e-3, G_pa = G * 1e6;
+        return (d_m / (Math.PI * Math.pow(D_m, 2) * Na)) * Math.sqrt(G_pa / den);
+    }
+};
+
+/**
+ * MODULE 3: Fatigue Analysis
+ */
+const FatigueAnalysis = {
+    evaluate: (tau_a, tau_m, S_ut, d) => {
+        const S_sa = 241, S_sm = 379;
+        const S_su = 0.67 * S_ut; 
+        const S_sy = 0.45 * S_ut; 
+        const S_se = S_sa / (1 - Math.pow(S_sm / S_su, 2));
+
+        let nf_gerber = 0, nf_goodman = 0, nf_soderberg = 0;
+
+        // Prevent divide-by-zero if purely static or purely alternating load
+        if (tau_a === 0) {
+            nf_gerber = Infinity; 
+            nf_goodman = Infinity;
+            nf_soderberg = Infinity;
+        } else if (tau_m === 0) {
+            nf_gerber = S_se / tau_a;
+            nf_goodman = S_se / tau_a;
+            nf_soderberg = S_se / tau_a;
+        } else {
+            let term_sqrt = Math.sqrt(1 + Math.pow((2 * tau_m * S_se) / (S_su * tau_a), 2));
+            nf_gerber = 0.5 * Math.pow(S_su / tau_m, 2) * (tau_a / S_se) * (-1 + term_sqrt);
+            nf_goodman = 1 / ((tau_a / S_se) + (tau_m / S_su));
+            nf_soderberg = 1 / ((tau_a / S_se) + (tau_m / S_sy));
+        }
+
+        return { S_se, S_su, S_sy, nf_gerber, nf_goodman, nf_soderberg };
+    }
+};
+
+/**
+ * MODULE 4: Optimization Engine
+ */
+const OptimizationEngine = {
+    run: function(inputs) {
+        const mat = MaterialDatabase.materials[inputs.matKey];
+        const k_req = inputs.F_max / inputs.y_max; 
+        const F_s = (1 + 0.15) * inputs.F_max; 
+        
+        let bestDesign = null;
+        let minMass = Infinity;
+
+        for (let d of MaterialDatabase.standardWires) {
+            for (let C = 4; C <= 12; C += 0.2) {
+                let D = C * d;
+                let Na = SpringPhysics.calculateActiveCoils(d, D, k_req, mat.G);
+                
+                if (Na < 3 || Na > 15) continue;
+
+                let Kw = SpringPhysics.calculateWahlFactor(C);
+                let S_ut = mat.A_m / Math.pow(d, mat.m);
+                let S_sy = mat.shear_ratio * S_ut;
+                
+                let tau_s = SpringPhysics.calculateShearStress(F_s, D, d, Kw);
+                let ns = S_sy / tau_s;
+                if (ns < inputs.target_ns) continue;
+
+                let F_a = (inputs.F_max - inputs.F_min) / 2;
+                let F_m = (inputs.F_max + inputs.F_min) / 2;
+                let tau_a = SpringPhysics.calculateShearStress(F_a, D, d, Kw);
+                let tau_m = SpringPhysics.calculateShearStress(F_m, D, d, Kw);
+                
+                let fatigue = FatigueAnalysis.evaluate(tau_a, tau_m, S_ut, d);
+                if (fatigue.nf_gerber < inputs.target_ns) continue;
+
+                let Nt = (inputs.endCond.includes("squared")) ? Na + 2 : Na + (inputs.endCond.includes("ground") ? 1 : 0);
+                let Ls = inputs.endCond.includes("ground") ? d * Nt : d * (Nt + 1);
+                let L0 = Ls + (F_s / k_req);
+                let pitch = inputs.endCond.includes("squared") ? (L0 - 2*d)/Na : (L0 - d)/Na;
+
+                if (pitch <= d) continue; 
+
+                let wire_len = Math.PI * D * Nt;
+                let mass_kg = (Math.PI * Math.pow(d, 2) / 4) * wire_len * (mat.den * 1e-9);
+
+                if (mass_kg < minMass) {
+                    minMass = mass_kg;
+                    bestDesign = this.compileDesign(inputs, mat, d, D, C, Na, Nt, L0, Ls, pitch, k_req, S_ut, S_sy, ns, SpringPhysics.calculateShearStress(inputs.F_max, D, d, Kw), tau_a, tau_m, Kw, fatigue, mass_kg);
+                }
+            }
+        }
+        return bestDesign || this.generateFallback(inputs, mat, k_req);
+    },
+
+    compileDesign: function(inputs, mat, d, D, C, Na, Nt, L0, Ls, pitch, k, S_ut, S_sy, ns, tau_max, tau_a, tau_m, Kw, fatigue, mass) {
+        let alerts = [];
+        let alpha = inputs.endCond.includes("squared") ? 0.5 : 0.707;
+        let L_crit = 2.63 * (D / alpha);
+        let slenderness = L0 / D;
+        
+        if (slenderness > 4) alerts.push(`High Slenderness (${slenderness.toFixed(1)}). Guide rod recommended.`);
+        if (L0 > L_crit) alerts.push(`Buckling Risk. Free length exceeds critical length (${L_crit.toFixed(1)} mm).`);
+
+        let f_surge = SpringPhysics.calculateSurgeFrequency(d, D, Na, mat.G, mat.den);
+        if (inputs.f_op > (f_surge / 15)) alerts.push(`Resonance Warning: Operating freq approaches 1/15th of surge freq (${f_surge.toFixed(1)} Hz).`);
+
+        return {
+            isValid: true, d, D, C, Na, Nt, L0, Ls, pitch, k, S_ut, S_sy, ns, tau_max,
+            tau_a, tau_m, Kw, fatigue, mass: mass * 1000, f_surge, alerts, matName: mat.name
+        };
+    },
+
+    generateFallback: function(inputs, mat, k_req) {
+        let d = 5.0; let C = 8; let D = C * d;
+        let Na = SpringPhysics.calculateActiveCoils(d, D, k_req, mat.G);
+        let Kw = SpringPhysics.calculateWahlFactor(C);
+        let S_ut = mat.A_m / Math.pow(d, mat.m);
+        let tau_max = SpringPhysics.calculateShearStress(inputs.F_max, D, d, Kw);
+        let pitch = 5; // Default safety pitch
+        let Nt = Na + 2;
+        return { 
+            isValid: false, alerts: ["NO OPTIMAL DESIGN FOUND WITHIN CONSTRAINTS. Displaying oversized theoretical fallback."], 
+            d, D, C, Na, Nt, L0: 100, Ls: d*Nt, pitch, k: k_req, ns: (0.45*S_ut)/tau_max, 
+            tau_max, tau_a: 0, tau_m: tau_max, fatigue: FatigueAnalysis.evaluate(0, tau_max, S_ut, d), mass: 500, f_surge: 0 
+        };
+    }
+};
+
+/**
+ * MODULE 5: 3D Visualization (Three.js)
+ */
+const Visualization3D = {
+    scene: null, camera: null, renderer: null, mesh: null, controls: null,
+
+    init: function() {
+        const container = document.getElementById('threeCanvas');
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xffffff);
+
+        this.camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 2000);
+        this.camera.position.set(0, 60, 150);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(this.renderer.domElement);
+
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(50, 100, 50);
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        backLight.position.set(-50, -50, -50);
+        this.scene.add(ambientLight, dirLight, backLight);
+
+        this.animate();
+    },
+
+    renderSpring: function(res) {
+        if(!this.scene) this.init();
+        if(this.mesh) this.scene.remove(this.mesh);
+
+        class PreciseHelicalCurve extends THREE.Curve {
+            constructor(radius, pitch, turns) {
+                super();
+                this.radius = radius;
+                this.pitch = pitch;
+                this.turns = turns;
+            }
+            getPoint(t, optionalTarget = new THREE.Vector3()) {
+                const angle = 2 * Math.PI * this.turns * t;
+                const x = this.radius * Math.cos(angle);
+                const z = this.radius * Math.sin(angle);
+                const y = (this.pitch * this.turns * t) - (this.pitch * this.turns / 2); 
+                return optionalTarget.set(x, y, z);
+            }
+        }
+
+        const validNt = (res.Nt && res.Nt > 0) ? res.Nt : 10;
+        const validPitch = (res.pitch && res.pitch > 0) ? res.pitch : 5;
+
+        const path = new PreciseHelicalCurve(res.D / 2, validPitch, validNt);
+        const geometry = new THREE.TubeGeometry(path, Math.floor(validNt * 64), res.d / 2, 24, false);
+        const material = new THREE.MeshPhysicalMaterial({ 
+            color: 0x7f8fa6, metalness: 0.9, roughness: 0.3, clearcoat: 0.5 
+        });
+        
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.scene.add(this.mesh);
+
+        this.camera.position.set(0, (res.L0 || 100) * 0.8, res.D * 4);
+        this.controls.target.set(0, 0, 0);
+    },
+
+    animate: function() {
+        requestAnimationFrame(() => Visualization3D.animate());
+        Visualization3D.controls.update();
+        Visualization3D.renderer.render(Visualization3D.scene, Visualization3D.camera);
+    },
+
+    exportSTL: function() {
+        if (!this.mesh) return;
+        const exporter = new THREE.STLExporter();
+        const stlString = exporter.parse(this.scene);
+        const blob = new Blob([stlString], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'Optimized_Spring.stl';
+        link.click();
+    }
+};
+
+/**
+ * MODULE 6: UI & Chart Controller
+ */
+let fatigueChartInstance = null;
+
+const UIController = {
+    computeAndRender: function() {
+        const inputs = {
+            matKey: document.getElementById("material").value,
+            endCond: document.getElementById("end_condition").value,
+            F_max: parseFloat(document.getElementById("force_max").value),
+            F_min: parseFloat(document.getElementById("force_min").value),
+            y_max: parseFloat(document.getElementById("def_max").value),
+            f_op: parseFloat(document.getElementById("freq_op").value),
+            target_ns: parseFloat(document.getElementById("target_ns").value)
+        };
+
+        const res = OptimizationEngine.run(inputs);
+        window.currentDesign = res; // Store globally for the macro
+        
+        this.updateGrid(res);
+        this.updateChart(res);
+        Visualization3D.renderSpring(res);
+        ReportGenerator.buildHiddenReport(inputs, res);
+    },
+
+    // NEW: Copy Macro Function
+    copyMacro: function() {
+        if (!window.currentDesign || !window.currentDesign.isValid) {
+            alert("Please run the optimization first to generate a valid design.");
+            return;
+        }
+        
+        const res = window.currentDesign;
+        
+        // SolidWorks API always takes dimensions in meters
+        const MeanDia_m = (res.D / 1000).toFixed(6);
+        const length_m = (res.L0 / 1000).toFixed(6);
+        const pitch_m = (res.pitch / 1000).toFixed(6);
+        const wireDia_m = (res.d / 1000).toFixed(6);
+        const coils = res.Na.toFixed(3);
+
+        const macroCode = `' **************************************************************
+' Parametric Helical Spring Macro
+' Parameters: Mean Diameter, Spring Height, Wire Diameter, Coils
+' **************************************************************
+
+Dim swApp As Object
+Dim Part As Object
+Dim boolstatus As Boolean
+
+Sub main()
+
+Set swApp = Application.SldWorks
+Set Part = swApp.ActiveDoc
+
+' ==========================
+' USER PARAMETERS
+' ==========================
+
+Dim meanDia As Double
+Dim springHeight As Double
+Dim wireDia As Double
+Dim coils As Double
+
+meanDia = ${MeanDia_m}        ' Mean Coil Diameter (m) 
+springHeight = ${length_m}   ' Spring Height (m) 
+wireDia = ${wireDia_m}      ' Wire Diameter (m)
+coils = ${coils}            ' Number of Coils
+
+Dim helixPitch As Double
+helixPitch = springHeight / coils
+
+' ==========================
+' CREATE BASE CIRCLE
+' ==========================
+
+boolstatus = Part.Extension.SelectByID2("Top Plane", "PLANE", 0, 0, 0, False, 0, Nothing, 0)
+
+Part.SketchManager.InsertSketch True
+Part.ClearSelection2 True
+
+Dim skSegment As Object
+Set skSegment = Part.SketchManager.CreateCircle(0#, 0#, 0#, meanDia / 2, 0#, 0#)
+
+Part.ClearSelection2 True
+
+' ==========================
+' CREATE HELIX
+' ==========================
+
+Part.InsertHelix False, True, False, True, 1, springHeight, helixPitch, coils, 0, 0
+
+Part.ClearSelection2 True
+
+' ==========================
+' SWEEP PROFILE
+' ==========================
+
+boolstatus = Part.Extension.SelectByID2("Helix/Spiral1", "REFERENCECURVES", 0, 0, 0, False, 4, Nothing, 0)
+
+Dim swFeatMgr As Object
+Set swFeatMgr = Part.FeatureManager
+
+Dim swFeatData As Object
+Set swFeatData = swFeatMgr.CreateDefinition(swFeatureNameID_e.swFmSweep)
+
+swFeatData.CircularProfile = True
+swFeatData.CircularProfileDiameter = wireDia
+
+swFeatData.TwistControlType = 0
+swFeatData.Merge = True
+
+Dim swFeat As Object
+Set swFeat = swFeatMgr.CreateFeature(swFeatData)
+
+Part.ClearSelection2 True
+
+' ==========================
+' HIDE HELIX
+' ==========================
+
+boolstatus = Part.Extension.SelectByID2("Helix/Spiral1", "REFERENCECURVES", 0, 0, 0, False, 0, Nothing, 0)
+Part.BlankRefGeom
+
+Part.ClearSelection2 True
+
+' ==========================
+' HIDE SKETCH
+' ==========================
+
+boolstatus = Part.Extension.SelectByID2("Sketch1", "SKETCH", 0, 0, 0, False, 0, Nothing, 0)
+Part.BlankSketch
+
+Part.ClearSelection2 True
+
+
+End Sub
+
+ '`;
+
+        navigator.clipboard.writeText(macroCode).then(() => {
+            alert("✅ SolidWorks Macro Code Copied Successfully!\n\nOpen SolidWorks -> Open a New Part -> Tools -> Macro -> New -> Paste the code -> Run!");
+        }).catch(err => {
+            alert("Failed to copy code. Please check browser permissions.");
+        });
+    },
+
+    updateGrid: function(res) {
+        const grid = document.getElementById("summaryGrid");
+        const alertDiv = document.getElementById("alertsContainer");
+        
+        if (!res.isValid) {
+            grid.innerHTML = `<div class="result-box danger"><strong>Error</strong><span>Optimization Failed</span></div>`;
+            alertDiv.style.display = "block";
+            alertDiv.innerHTML = res.alerts[0];
+            return;
+        }
+
+        grid.innerHTML = `
+            <div class="result-box"><strong>Wire Dia (d)</strong><span>${res.d.toFixed(3)} <small>mm</small></span></div>
+            <div class="result-box"><strong>Mean Dia (D)</strong><span>${res.D.toFixed(2)} <small>mm</small></span></div>
+            <div class="result-box"><strong>Index (C)</strong><span>${res.C.toFixed(2)}</span></div>
+            <div class="result-box"><strong>Rate (k)</strong><span>${res.k.toFixed(2)} <small>N/mm</small></span></div>
+            <div class="result-box"><strong>Active Coils</strong><span>${res.Na.toFixed(1)}</span></div>
+            <div class="result-box"><strong>Free Length</strong><span>${res.L0.toFixed(2)} <small>mm</small></span></div>
+            <div class="result-box"><strong>Solid Length</strong><span>${res.Ls.toFixed(2)} <small>mm</small></span></div>
+            <div class="result-box ${res.ns < 1.2 ? 'warn' : ''}"><strong>Static ns</strong><span>${res.ns.toFixed(2)}</span></div>
+            <div class="result-box ${res.fatigue.nf_gerber < 1.2 ? 'warn' : ''}"><strong>Gerber nf</strong><span>${res.fatigue.nf_gerber.toFixed(2)}</span></div>
+            <div class="result-box"><strong>Surge Freq</strong><span>${res.f_surge.toFixed(0)} <small>Hz</small></span></div>
+            <div class="result-box"><strong>Total Mass</strong><span>${res.mass.toFixed(2)} <small>g</small></span></div>
+        `;
+
+        if (res.alerts && res.alerts.length > 0) {
+            alertDiv.innerHTML = "<strong>&#9888; Diagnostic Warnings:</strong><br>" + res.alerts.join("<br>");
+            alertDiv.style.display = "block";
+        } else {
+            alertDiv.style.display = "none";
+        }
+    },
+
+    updateChart: function(res) {
+        if (!res.isValid) return;
+        const ctx = document.getElementById('fatigueChart').getContext('2d');
+        if(fatigueChartInstance) fatigueChartInstance.destroy();
+
+        let f = res.fatigue;
+        let gerberData = [], soderbergData = [], goodmanData = [];
+        
+        for (let m = 0; m <= f.S_su; m += f.S_su/30) {
+            gerberData.push({x: m, y: Math.max(0, f.S_se * (1 - Math.pow(m / f.S_su, 2)))});
+        }
+        goodmanData = [{x: 0, y: f.S_se}, {x: f.S_su, y: 0}];
+        soderbergData = [{x: 0, y: f.S_se}, {x: f.S_sy, y: 0}];
+
+        fatigueChartInstance = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    { label: 'Gerber Parabola', data: gerberData, borderColor: '#e74c3c', showLine: true, fill: false, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Goodman Line', data: goodmanData, borderColor: '#f39c12', showLine: true, borderDash: [5, 5], fill: false, pointRadius: 0 },
+                    { label: 'Soderberg Line', data: soderbergData, borderColor: '#2980b9', showLine: true, borderDash: [2, 2], fill: false, pointRadius: 0 },
+                    { label: 'Operating Point', data: [{x: res.tau_m, y: res.tau_a}], backgroundColor: '#2c3e50', pointRadius: 6, pointHoverRadius: 8 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: 'Mean Shear Stress, τ_m (MPa)' }, min: 0 },
+                    y: { title: { display: true, text: 'Alternating Shear Stress, τ_a (MPa)' }, min: 0 }
+                }
+            }
+        });
+    }
+};
+
+/**
+ * MODULE 7: Professional Reporting
+ */
+const ReportGenerator = {
+    buildHiddenReport: function(inputs, res) {
+        const report = document.getElementById('hiddenReport');
+        if (!res.isValid) return;
+        
+        report.innerHTML = `
+            <div style="padding: 40px; font-family: 'Helvetica', sans-serif; color: #333;">
+                <h2 style="color: #2c3e50; border-bottom: 2px solid #2980b9; padding-bottom: 10px;">Helical Spring Engineering Report</h2>
+                
+                <h4 style="color: #2980b9; margin-top: 20px;">1. Design Inputs & Material Properties</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                    <tr style="background: #ecf0f1;">
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Material</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.matName}</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Operating Force Range</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${inputs.F_min} - ${inputs.F_max} N</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Ultimate Strength (S_ut)</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.S_ut.toFixed(2)} MPa</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Max Deflection (y_max)</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${inputs.y_max} mm</td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #2980b9;">2. Optimized Geometry</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>Wire Diameter (d)</b></td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.d.toFixed(3)} mm</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>Mean Dia (D)</b></td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.D.toFixed(2)} mm</td>
+                    </tr>
+                    <tr style="background: #ecf0f1;">
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>Spring Index (C)</b></td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.C.toFixed(2)}</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>Active Coils (Na)</b></td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.Na.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>Free Length (L0)</b></td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.L0.toFixed(2)} mm</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>Solid Length (Ls)</b></td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.Ls.toFixed(2)} mm</td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #2980b9;">3. Static & Fatigue Stress Analysis</h4>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                    <tr style="background: #ecf0f1;">
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Max Shear (τ_max)</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.tau_max.toFixed(2)} MPa</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Static F.O.S (n_s)</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>${res.ns.toFixed(2)}</b></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Alt Shear (τ_a)</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">${res.tau_a.toFixed(2)} MPa</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;">Gerber F.O.S (n_f)</td>
+                        <td style="padding: 8px; border: 1px solid #bdc3c7;"><b>${res.fatigue.nf_gerber.toFixed(2)}</b></td>
+                    </tr>
+                </table>
+
+                <h4 style="color: #2980b9;">4. Stability & Dynamics</h4>
+                <ul style="font-size: 12px;">
+                    <li><b>Surge Frequency (f_s):</b> ${res.f_surge.toFixed(1)} Hz</li>
+                    <li><b>Slenderness Ratio (L0/D):</b> ${(res.L0/res.D).toFixed(2)}</li>
+                    <li><b>Estimated Mass:</b> ${res.mass.toFixed(2)} grams</li>
+                </ul>
+            </div>
+        `;
+    },
+
+    generatePDF: function() {
+        const element = document.getElementById('hiddenReport');
+        if (element.innerHTML.trim() === "") {
+            alert("Please run the optimization first.");
+            return;
+        }
+        element.style.display = "block";
+        html2pdf().set({
+            margin: 0.5, filename: 'Spring_Calculation_Sheet.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        }).from(element).save().then(() => {
+            element.style.display = "none";
+        });
+    }
+};
+
+window.onload = () => {
+    Visualization3D.init();
+    UIController.computeAndRender(); 
+};
+</script>
+
+</body>
+</html>
